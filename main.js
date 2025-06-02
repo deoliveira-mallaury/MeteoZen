@@ -155,7 +155,7 @@ document
         div.appendChild(dayTitle);
 
         let ul = document.createElement("ul");
-
+        ul.classList.add('previsionByDay')
         let translatedEntries = await Promise.all(
           weatherDatas[date].map(async (entry) => {
             let weatherDescription = await translateText(entry.weather, "fr");
