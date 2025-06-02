@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
@@ -22,17 +22,22 @@
         </div>
     </header>
     <main>
-        <div class="search__section">
+        <form class="search__section">
             <label class="labelCP" for="city">Veuillez saisir votre code postal</label>
-            <input type="text" name="city" id="city" />
-            <a class="search" href="#"><img class="searchBtn" src="./assets/icons/search.svg" alt="search"></a>
-        </div>
+            <input type="text" name="city" id="city" placeholder="Saisir votre code postal" />
+            <button class="search" href="#"><img class="searchBtn" src="./assets/icons/search.svg"
+                    alt="search"></button>
+        </form>
         <ul class="autoCompleteList">
         </ul>
         <section class="meteo">
             <h1 id="currCity"></h1>
-        </section>
 
+        </section>
+    </main>
+    <footer>
+        &copy; - MeteoZen - 2025
+    </footer>
     <script src="./main.js"></script>
 </body>
 

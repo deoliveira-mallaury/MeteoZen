@@ -26,7 +26,7 @@ async function findCity(search) {
     return currentLocalisations;
   } catch (error) {
     console.error("Une erreur s'est produite :", error.message);
-    return null; 
+    return null;
   }
 }
 async function weather(lon, lat) {
@@ -42,7 +42,7 @@ async function weather(lon, lat) {
     }
     const datas = await response.json();
 
-    let weatherData = {}; 
+    let weatherData = {};
     let options = {
       hour: "2-digit",
       minute: "2-digit",
@@ -54,6 +54,7 @@ async function weather(lon, lat) {
       let parsedDate = new Date(data.dt_txt);
       let day = parsedDate.getDate();
       let date = parsedDate.toLocaleString("fr-FR", {
+        weekday: "short",
         day: "2-digit",
         month: "short",
         year: "numeric",
@@ -121,64 +122,86 @@ cityInput.addEventListener("input", function (e) {
 document
   .querySelector(".autoCompleteList")
   .addEventListener("click", async function (e) {
-    let day = document.createElement("h3");
-    let weatherInfo;
+    if (!e.target || !e.target.textContent) return;
 
-    if (e.target && e.target.textContent) {
-      cityInput.value = e.target.textContent; // Utilise textContent au lieu de name
-      let selectedCity = currentLocalisation.find(
-        (city) => city.name === e.target.textContent
-      );
-      document.getElementById(
-        "currCity"
-      ).textContent = `${selectedCity.name} - (${selectedCity.cp})`;
-      weatherInfo = weather(selectedCity.lon, selectedCity.lat)
-        .then(async (weatherDatas) => {
-          let dates = Object.keys(weatherDatas);
-          let meteoContainer = document.querySelector(".meteo");
+    cityInput.value = e.target.textContent; // Met à jour l'input avec le texte sélectionné
 
-          for (const date of dates) {
-            let div = document.createElement("div");
-            let dayTitle = document.createElement("h2");
-            let ul = document.createElement("ul");
-            div.classList.add("weatherByDay");
-            dayTitle.textContent = date;
-            meteoContainer.appendChild(div);
-            div.appendChild(dayTitle);
+    let selectedCity = currentLocalisation.find(
+      (city) => city.name === e.target.textContent
+    );
 
-            // function traduction API info to render
-            let translatedEntries = await Promise.all(
-              weatherDatas[date].map(async (entry) => {
-                let weatherDescription = await translateText(
-                  entry.weather,
-                  "fr"
-                );
-                return { ...entry, translatedWeather: weatherDescription };
-              })
-            );
-
-            translatedEntries.forEach((entry) => {
-              let weatherByHours = document.createElement("li");
-              weatherByHours.classList.add("prevision");
-              let weathericon = entry.weather.replace(/ /g, "");
-              if (weathericon === "scatteredclouds") {
-                weathericon = "fewclouds";
-              }
-
-              weatherByHours.innerHTML = `
-              <h4 class="hour">${entry.time}</h4>
-              <img class="weathericon" src="./assets/icons/${weathericon}.svg" alt="search"/>
-              <span class="weatherdescr">${entry.translatedWeather}</span>
-              <span class="weathertemp">${entry.temp}°C</span>`;
-              ul.appendChild(weatherByHours);
-            });
-
-            div.appendChild(ul);
-          }
-        })
-
-        .catch((error) => console.error("Erreur :", error));
+    if (!selectedCity) {
+      console.error("Ville non trouvée !");
+      return;
     }
+
+    document.getElementById(
+      "currCity"
+    ).textContent = `${selectedCity.name} - (${selectedCity.cp})`;
+
+    try {
+      let weatherDatas = await weather(selectedCity.lon, selectedCity.lat);
+      let dates = Object.keys(weatherDatas);
+      let meteoContainer = document.querySelector(".meteo");
+
+      meteoContainer.innerHTML = ""; // Réinitialise le conteneur météo avant d'ajouter les nouvelles données
+
+      for (const date of dates) {
+        let div = document.createElement("div");
+        div.classList.add("weatherByDay");
+
+        let dayTitle = document.createElement("h2");
+        dayTitle.textContent = date;
+        div.appendChild(dayTitle);
+
+        let ul = document.createElement("ul");
+
+        let translatedEntries = await Promise.all(
+          weatherDatas[date].map(async (entry) => {
+            let weatherDescription = await translateText(entry.weather, "fr");
+            return { ...entry, translatedWeather: weatherDescription };
+          })
+        );
+
+        translatedEntries.forEach((entry) => {
+          let weatherByHours = document.createElement("li");
+          weatherByHours.classList.add("prevision");
+
+          let weathericon = entry.weather.replace(/ /g, "");
+          if (weathericon === "scatteredclouds") {
+            weathericon = "fewclouds";
+          }
+
+          let hour = document.createElement("h4");
+          hour.textContent = entry.time;
+
+          let weatherIcon = document.createElement("img");
+          weatherIcon.classList.add("weathericon");
+          weatherIcon.setAttribute(
+            "src",
+            `./assets/icons/${weathericon}.svg`
+          );
+          weatherIcon.setAttribute("alt", `Icône météo ${weathericon}`);
+
+          let weatherDescr = document.createElement("span");
+          weatherDescr.classList.add("weatherdescr");
+          weatherDescr.textContent = entry.translatedWeather;
+
+          let weatherTemp = document.createElement("span");
+          weatherTemp.classList.add("weathertemp");
+          weatherTemp.textContent = `${entry.temp}°C`;
+
+          weatherByHours.append(hour, weatherIcon, weatherDescr, weatherTemp);
+          ul.appendChild(weatherByHours);
+        });
+
+        div.appendChild(ul);
+        meteoContainer.appendChild(div);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la récupération des données météo :", error);
+    }
+
     e.preventDefault();
     autoCompleteList.innerHTML = "";
   });
