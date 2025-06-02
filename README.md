@@ -4,6 +4,9 @@
 MétéoZen est une application qui permet aux utilisateurs de consulter les prévisions météo en temps réel en fonction de leur ville ou code postal.  
 Elle offre aussi une **traduction automatique** des descriptions météo pour une meilleure compréhension.
 
+## Installation
+Dans fichier main.js ligne 2, veuillez remplir par API key valide.
+
 ## 🚀 Technologies utilisées
 - **HTML/CSS/JavaScript** : Développement du front-end et de la logique applicative.
 - **API OpenWeatherMap** : Récupération des prévisions météo détaillées.
